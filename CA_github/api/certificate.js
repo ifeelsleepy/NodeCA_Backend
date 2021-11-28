@@ -171,14 +171,14 @@ certificate.revoke = function(req,res){
 * Return all certificates
 */
 var getIndex = function() {
-    return certificates;
+    return certificate;
 }
 
 
 /**
  * Lists certificates
  */
- certificates.list = function(req, res){
+ certificate.list = function(req, res){
     
 
     console.log("Request: List all active certificates. Filter: " + req.body.data.state + ". By: " + req.body.data.username);

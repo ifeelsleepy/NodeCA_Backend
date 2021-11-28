@@ -38,9 +38,18 @@ var initAPI = function(app) {
     /*
      * REVOKE
     */
-   
+
     app.post('/certificate/revoke/', function(req, res) {
         certapi.certificate.revoke(req, res);
+    });
+  
+    /*
+     * LIST
+    */
+
+
+    app.post(apipath + '/certificates/list/', function(req, res) {
+        certapi.certificate.list(req, res);
     });
 
 };
