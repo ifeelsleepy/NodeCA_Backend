@@ -24,7 +24,7 @@
 List all issued certificates:
 
 ```
-curl -H "Content-type: application/json" -d '{ "data": { "state":"all" }, "auth": { "username":"john" } }' http://localhost:8080/certificates/list
+curl -H "Content-type: application/json" -d '{ "data": { "state":"all" }, "auth": { "username":"john" } }' http://localhost:8080/certificate/list
 ```
 
 
@@ -39,7 +39,7 @@ curl -H "Content-type: application/json" -d '{ "data": { "applicant":"John", "cs
 
 ### Request certificate
 
-    POST /certificate/request/
+    PUT /certificate/request/
 
     Request params:
     * applicant: <String> | Applicant, who requests certificate (for future usage)
@@ -64,7 +64,7 @@ curl -H "Content-type: application/json" -d '{ "data": { "applicant":"John", "cs
 
 ### Get certificate
 
-    POST /certificate/:id/get/
+    GET /certificate/:id/get/
 
     Request params:
     * id: <String> | Serial number of the certificate
