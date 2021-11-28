@@ -11,7 +11,7 @@
 
 ## Setup instructions
 
-    git clone https://
+    git clone https://github.com/ifeelsleepy/NodeCA_Backend.git
     cd nodepki
     npm install  
 
