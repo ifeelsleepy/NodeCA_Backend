@@ -8,6 +8,9 @@ var exec = require('child_process').exec;
 
 var certificate = {};
 
+/**
+ *  Request method creates certificate from .csr file
+ */
 certificate.request = function(req, res){
     console.log("------\r\nReceived a certificate request from %s!", req.body.data.applicant);
     //console.log("the req thing",req);
@@ -19,9 +22,7 @@ certificate.request = function(req, res){
     console.log("pkipath: ", global.paths.pkipath);
     console.log("tempdir: ", global.paths.tempdir);
 
-    //var signcommand = util.format('openssl ca -batch -config %sopenssl.cnf -extensions server_cert -days 1 -notext -md sha256 -in request.csr -key "%s" -out cert.pem', global.paths.pkipath, "jjdfhhk_348dsjj4JJhsk4j7svenjemHfen");
-    // change the key file to ascii format before the sign command
-    //$ iconv -c -f UTF8 -t ASCII ../private/ca.key.pem > key.pk8
+
     // $ openssl rsa -in key.pk8 -out key.pem
     var signcommand = util.format('openssl x509 -req -in %srequest.csr -days 365 -CA %scerts/ca.cert.pem -CAkey %sprivate/key.pem -set_serial 1 -out cert.pem -extfile %sopenssl.conf -extensions v3_ca',global.paths.tempdir,global.paths.pkipath,global.paths.pkipath,global.paths.pkipath)
 
@@ -66,6 +67,9 @@ certificate.request = function(req, res){
 }
 var regex = /([R,E,V])(\t)(.*)(\t)(.*)(\t)([\dA-F]*)(\t)(unknown)(\t)(.*)/;
 
+
+//Reindex files once revoked
+
 var reindex = function() {
     return new Promise(function(resolve, reject) {
         console.log("Reindexing database ...");
@@ -108,6 +112,9 @@ var reindex = function() {
 }
 
 
+/**
+ * Revokes certificates
+ */
 certificate.revoke = function(req,res){
     console.log("------\r\nReceived a revocation request from %s!", req.body.data.applicant);
     cert = req.body.data.cert;
@@ -158,6 +165,99 @@ certificate.revoke = function(req,res){
 
 
 }
+
+
+/*
+* Return all certificates
+*/
+var getIndex = function() {
+    return certificates;
+}
+
+
+/**
+ * Lists certificates
+ */
+ certificates.list = function(req, res){
+    
+
+    console.log("Request: List all active certificates. Filter: " + req.body.data.state + ". By: " + req.body.data.username);
+
+    var filter = '';
+
+    switch(data.state) {
+        case 'all':
+            filter = '';
+            break;
+        case 'revoked':
+            filter = 'R';
+            break;
+        case 'valid':
+            filter = 'V';
+            break;
+        case 'expired':
+            filter = 'E';
+            break;
+        default:
+            // Filter is invalid
+            respond({ success: false }, res);
+    }
+
+    // Get certificate index
+    var certindex = getIndex();
+
+    var result = new Array();
+
+    certindex.forEach(function(certificate) {
+        if(filter == '') {
+            result.push(certificate);
+        } else {
+            if(certificate.state === filter) {
+                result.push(certificate);
+            }
+        }
+    });
+
+    respond({
+        certs: result,
+        success: true
+    }, res);
+};
+
+/**
+ * Gets certificate requests
+ */
+certificate.get = function(req, res) {
+
+    var data = req.body.data;
+    var auth = req.body.auth;
+
+    log.info("Request: Get certificate. By: " + auth.username);
+
+    var certfile = global.paths.pkipath + "newcerts/" + data.serialnumber + ".pem";
+
+    if(fs.existsSync(certfile)){
+        fs.readFile(certfile, 'utf8', function(err, certdata){
+            if(err) {
+                log.error("Could not read certificate file.");
+                errorresponse({ code:101, message:"Internal server error."}, res);
+            } else {
+                respond({
+                    success: true,
+                    cert: certdata
+                }, res);
+            }
+        });
+    } else {
+        // Certificate file not found.
+        log.error("Certificate file not found.")
+        errorresponse({ code:101, message:"Internal server error."}, res);
+    }
+};
+
+
+
+
 
 
 

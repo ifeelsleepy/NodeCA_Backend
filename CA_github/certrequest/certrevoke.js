@@ -1,5 +1,5 @@
 /*
- * Requests a certificate
+ * Revokes a certificate
  */
 
 var http = require('http');
@@ -10,7 +10,7 @@ function revoketCert(csrdata) {
         host: 'localhost',
         port: 8081,
         path: '/certificate/revoke/',
-        method: 'PUT',
+        method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         }
@@ -29,7 +29,7 @@ function revoketCert(csrdata) {
 
     var jsonobj = {
         csr: csrdata,
-        applicant: "Thomas Leister"
+        applicant: "John Doe"
     };
 
     var json = JSON.stringify(jsonobj);
@@ -43,7 +43,7 @@ function revoketCert(csrdata) {
 /*
  * Read cert data from file
  */
-//fs.readFile('/cert.csr', 'utf8', function(err, csrdata){
+
 fs.readFile('/Users/shivanikannan/CA_github/certrequest/cert.csr', 'utf8', function(err, csrdata){
     if(err == null) {
         revokeCert(csrdata);
